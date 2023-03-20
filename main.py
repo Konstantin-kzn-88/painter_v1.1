@@ -1,16 +1,17 @@
-# This is a sample Python script.
+import numpy as np
+from scipy.signal import fftconvolve
+import matplotlib.pyplot as plt
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+points = np.array([[150, 150], [90, 90], [250, 330], [400, 300], [100, 250], [400, 100], [250, 400]])
+width, height = 500, 500
+im = np.zeros((width, height))
+im[points[:, 1], points[:, 0]] = 1.0  # set points
+x = np.arange(0, 201)
+y = np.arange(0, 201)
+X, Y = np.meshgrid(x, y)
+distance = ((X - 100) ** 2 + (Y - 100) ** 2) ** .5
+power = 1 - distance / 100
+power[power < 0] = 0  # cut off power function
+power = power / np.sum(power)  # normalization
+result = fftconvolve(im, power, mode='same')  # convolutions
+plt.imshow(result, cmap='jet', aspect='equal')
