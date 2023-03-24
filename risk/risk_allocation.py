@@ -16,7 +16,7 @@ class Allocation:
     def __init__(self, points: list, size_area: tuple, power_risk: int):
         '''
 
-        :@param points: список точек 2-D ( например, [[x,y],[x1,y1],...,[xn,yn] )
+        :@param points: список точек 2-D ( например, [(x,y),(x1,y1),...,(xn,yn)] )
         :@param size_area: размер исследуемой области, pixel (например, (width, height))
         :@param power_risk: сила воздействия точек, pixel
         '''

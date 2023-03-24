@@ -9,7 +9,7 @@ def fmt(x, pos):
     return r'${} \times 10^{{{}}}$'.format(a, b)
 
 
-points = [[30, 30], [60, 60], [90, 90], [120, 120], [150, 150]]
+points = [(30, 30), (60, 60), (90, 90), (120, 120),(150, 150)]
 size_area = (500, 500)
 power_risk = 100
 result = 0
