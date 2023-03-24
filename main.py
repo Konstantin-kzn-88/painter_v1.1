@@ -9,13 +9,14 @@ def fmt(x, pos):
     return r'${} \times 10^{{{}}}$'.format(a, b)
 
 
-points = [[150, 150], [90, 90], [250, 330], [400, 300], [100, 250], [400, 100], [250, 400]]
+points = [[30, 30], [60, 60], [90, 90], [120, 120], [150, 150]]
 size_area = (500, 500)
 power_risk = 100
 result = 0
 
 for point in points:
     result += risk_allocation.Allocation(point, size_area, power_risk).calculation()
+
 
 plt.pcolor(result, cmap='jet')
 plt.colorbar(format=ticker.FuncFormatter(fmt))
