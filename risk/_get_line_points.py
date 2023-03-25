@@ -31,7 +31,6 @@ class Polyline:
             # точки ломанной
             x1, x2 = self.points[i][0], self.points[i + 1][0]
             y1, y2 = self.points[i][1], self.points[i + 1][1]
-            print(x1,x2)
             # расстояние
             dist = np.linalg.norm(np.array([x1,y1]) - np.array([x2,y2]))
             # количество точек
