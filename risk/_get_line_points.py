@@ -7,32 +7,42 @@
 # -----------------------------------------------------------
 
 import numpy as np
-from scipy.signal import fftconvolve
-
 
 class Polyline:
     """
-    Класс предназначен для получения массива координат ломанной линии
-    по её вершинам
+    Класс предназначен для получения массива равноудаленных координат
+    каждого отрезка ломанной линии по её вершинам
     """
 
     def __init__(self, points: list):
         '''
-
-        :@param points: список точек 2-D ломанной линии ( например, [[x,y],[x1,y1],...,[xn,yn] )
-        :@param size_area: размер исследуемой области, pixel (например, (width, height))
-        :@param power_risk: сила воздействия точек, pixel
+        :@param points: список точек 2-D ломанной линии ( например, [(x,y),(x1,y1),...,(xn,yn)] )
         '''
         self.points = points
 
+    def _del_duplicates(self, seq):
+        seen = set()
+        seen_add = seen.add
+        return [x for x in seq if not (x in seen or seen_add(x))]
+
     def get_all_coordinates(self):
-        result = []
+        result=[]
         for i in range(len(self.points) - 1):
-            print(self.points[i], self.points[i + 1])
-            # Получим коэффициеты прямой
-            k = (self.points[i][1] - self.points[i + 1][1]) / (self.points[i][0] - self.points[i + 1][0])
-            b = self.points[i + 1][1] - k * self.points[i + 1][0]
-            # Получим все координаты прячмой по 2 точкам
+            # точки ломанной
+            x1, x2 = self.points[i][0], self.points[i + 1][0]
+            y1, y2 = self.points[i][1], self.points[i + 1][1]
+            print(x1,x2)
+            # расстояние
+            dist = np.linalg.norm(np.array([x1,y1]) - np.array([x2,y2]))
+            # количество точек
+            num_point = int(dist)
+            # итерполяция линейная
+            x, y = np.linspace(x1, x2, num_point), np.linspace(y1, y2, num_point)
+            # полученные точки сложив список
+            result += [(a, b) for a, b in zip(x.astype(np.int64), y.astype(np.int64))]
+        # уберем дубликаты и вернем список точек
+        return self._del_duplicates(result)
+
 
 
 
