@@ -1,30 +1,62 @@
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from risk import risk_allocation, _get_line_points
+import numpy as np
+import sys
+
+from PySide6.QtCore import QObject, Signal, QRunnable
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton
+
+POINTS = [(150, 150), (90, 90), (250, 330), (400, 300), (100, 250), (400, 100), (250, 400)]
+SIZE_AREA = (500, 500)
+POWER = 50
 
 
-def fmt(x, pos):
-    a, b = '{:.2e}'.format(x).split('e')
-    b = int(b)
-    return r'${} \times 10^{{{}}}$'.format(a, b)
+# def fmt(x, pos):
+#     a, b = '{:.2e}'.format(x).split('e')
+#     b = int(b)
+#     return r'${} \times 10^{{{}}}$'.format(a, b)
+
+class WorkerSignals(QObject):
+    finished = Signal()
+    error = Signal(str)
+    result = Signal(str)
 
 
-line = [[50, 50], [200, 200], [400, 400]]
-line_coords = _get_line_points.Polyline(line).get_all_coordinates()
-size_area = (500, 500)
-power_risk = 100
-result = 0
+class Worker(QRunnable):
+    def __init__(self, size_area:tuple, point:tuple):
+        super().__init__()
+        self.signals = WorkerSignals()
+        self.size_area = size_area
+        self.point = point
 
-for point in line_coords:
-    result += risk_allocation.Allocation(point, size_area, power_risk).calculation()
+    def run(self):
+        try:
+            print(f'точка{self.point}')
+        except Exception as e:
+            self.signals.error.emit(str(e))
+        else:
+            self.signals.finished.emit()
+            self.signals.result.emit(f'точка{self.point} прошла в потоке')
 
-result = result / (0.5*len(line_coords))
-points = [[300, 300], [400, 400]]
 
-for point in points:
-    result += risk_allocation.Allocation(point, size_area, power_risk).calculation()
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Воздействие точек")
+        self.button = QPushButton("Расчет")
+        self.button.clicked.connect(self.start_worker)
+        self.setCentralWidget(self.button)
+
+    def start_worker(self):
+        print('hi')
 
 
-plt.pcolor(result, cmap='jet')
-plt.colorbar(format=ticker.FuncFormatter(fmt))
-plt.show()
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()
+
+# plt.pcolor(result, cmap='jet')
+# plt.colorbar(format=ticker.FuncFormatter(fmt))
+# plt.show()
