@@ -2,12 +2,13 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
 import sys
+import time
 
-from PySide6.QtCore import QObject, Signal, QRunnable
+from PySide6.QtCore import QObject, Signal, QRunnable, QThreadPool
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton
 
-POINTS = [(150, 150), (90, 90), (250, 330), (400, 300), (100, 250), (400, 100), (250, 400)]
-SIZE_AREA = (500, 500)
+POINTS = [(10, 10), (400, 400), (300, 300), (500, 500), (100, 10),  (10, 50),]
+SIZE_AREA = (503, 503)
 POWER = 50
 
 
@@ -23,7 +24,7 @@ class WorkerSignals(QObject):
 
 
 class Worker(QRunnable):
-    def __init__(self, size_area:tuple, point:tuple):
+    def __init__(self, size_area: tuple, point: tuple):
         super().__init__()
         self.signals = WorkerSignals()
         self.size_area = size_area
@@ -32,6 +33,7 @@ class Worker(QRunnable):
     def run(self):
         try:
             print(f'точка{self.point}')
+            time.sleep(3)
         except Exception as e:
             self.signals.error.emit(str(e))
         else:
@@ -47,8 +49,23 @@ class MainWindow(QMainWindow):
         self.button.clicked.connect(self.start_worker)
         self.setCentralWidget(self.button)
 
+        # е. Пул потоков
+        self.threadpool = QThreadPool()
+        self.threadpool.setMaxThreadCount(len(POINTS))
+        print(f'Число потоков {self.threadpool.maxThreadCount()}')
+
     def start_worker(self):
-        print('hi')
+        for POINT in POINTS:
+            worker = Worker(SIZE_AREA, POINT)
+            worker.signals.result.connect(self.worker_output)
+            worker.signals.finished.connect(self.worker_complete)
+            self.threadpool.start(worker)
+
+    def worker_output(self, s):
+        print(s)
+
+    def worker_complete(self):
+        print("THREAD COMPLETE!")
 
 
 if __name__ == '__main__':
