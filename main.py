@@ -3,13 +3,24 @@ import matplotlib.ticker as ticker
 import numpy as np
 import sys
 import time
+from shapely.geometry import LineString, Polygon, Point
 
 from PySide6.QtCore import QObject, Signal, QRunnable, QThreadPool
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton
 
-POINTS = [(10, 10), (400, 400), (300, 300), (500, 500), (100, 10),  (10, 50),]
-SIZE_AREA = (503, 503)
-POWER = 50
+# Координаты объектов
+OBJECTS = [(10, 10), (2500, 2500), (500, 2500), (2500, 2700, 1000, 1500), (300, 300, 300, 500, 500, 500, 500, 300)]
+# Типы объектов
+# 0 - линия
+# 1 - многоугольник
+# 2 - точка
+TYPE_OBJECTS = [2, 2, 2, 0, 1]
+# Площадь картинки
+SIZE_AREA = (3628, 3211)
+# Сила риска для каждого объекта
+POWER = [100, 100, 100, 100, 100]
+# Размер анализируемой сетки
+SIZE_SEARCH = 50
 
 
 # def fmt(x, pos):
@@ -24,21 +35,27 @@ class WorkerSignals(QObject):
 
 
 class Worker(QRunnable):
-    def __init__(self, size_area: tuple, point: tuple):
+    def __init__(self, size_area: tuple, obj_points: tuple, obj_type: int):
         super().__init__()
         self.signals = WorkerSignals()
         self.size_area = size_area
-        self.point = point
+        self.obj_points = obj_points
+        self.obj_type = obj_type
 
     def run(self):
         try:
-            print(f'точка{self.point}')
+            # посмотрим к каким областям относится рассматриваемы объект
+            # разобьем площадь картинки на квадраты поиска на квадраты поиска
+            x_line = [i for i in range(0, self.size_area[0] + 1, SIZE_SEARCH)].append(self.size_area[0]%SIZE_SEARCH)
+            y_line = [i for i in range(0, self.size_area[1] + 1, SIZE_SEARCH)].append(self.size_area[1]%SIZE_SEARCH)
+
+            print(f'Объект: {self.obj_points}')
             time.sleep(3)
         except Exception as e:
             self.signals.error.emit(str(e))
         else:
             self.signals.finished.emit()
-            self.signals.result.emit(f'точка{self.point} прошла в потоке')
+            self.signals.result.emit(f'объект  {self.obj_points} прошел в потоке')
 
 
 class MainWindow(QMainWindow):
@@ -51,12 +68,12 @@ class MainWindow(QMainWindow):
 
         # е. Пул потоков
         self.threadpool = QThreadPool()
-        self.threadpool.setMaxThreadCount(len(POINTS))
+        self.threadpool.setMaxThreadCount(len(OBJECTS))
         print(f'Число потоков {self.threadpool.maxThreadCount()}')
 
     def start_worker(self):
-        for POINT in POINTS:
-            worker = Worker(SIZE_AREA, POINT)
+        for OBJECT in OBJECTS:
+            worker = Worker(SIZE_AREA, OBJECT, POWER[OBJECTS.index(OBJECT)])
             worker.signals.result.connect(self.worker_output)
             worker.signals.finished.connect(self.worker_complete)
             self.threadpool.start(worker)
