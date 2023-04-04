@@ -16,9 +16,9 @@ OBJECTS = [(500, 100), (400, 200), (250, 500), (100, 150, 300, 300), (500, 500, 
 # 2 - точка
 TYPE_OBJECTS = [2, 2, 2, 0, 1]
 # Площадь картинки
-SIZE_AREA = (628, 628)
+SIZE_AREA = (640, 640)
 # Сила воздействия для каждого объекта
-POWER = [100, 200, 100, 100, 100]
+POWER = [100, 200, 100, 100, 130]
 # Размер анализируемой сетки
 SIZE_SEARCH_STEP_1 = 50
 SIZE_SEARCH_STEP_2 = 10
@@ -94,6 +94,7 @@ class Worker(QRunnable):
             find_square_50 = self.search_nearby(x_min=0, x_max=self.size_area[0], y_min=0, y_max=self.size_area[1],
                                                 size_search=SIZE_SEARCH_STEP_1, object_under_study=obj)
             # ШАГ 2.
+            print(f'Шаг №2 {self.obj_points}')
             find_square_10 = []
             for i in range(0, len(find_square_50), 8):
                 # Получим координаты квадратов по 50 пикселей и снова их разобъем на
@@ -106,6 +107,7 @@ class Worker(QRunnable):
                 find_square_10.extend(result_square)
 
             # ШАГ 3.
+            print(f'Шаг №3 {self.obj_points}')
             find_square_2 = []
             for i in range(0, len(find_square_10), 8):
                 # Получим координаты квадратов по 10 пикселей и снова их разобъем на
@@ -116,6 +118,7 @@ class Worker(QRunnable):
                                                    size_search=SIZE_SEARCH_STEP_3, object_under_study=obj)
                 find_square_2.extend(result_square)
             # # ШАГ 4.
+            print(f'Шаг №4 {self.obj_points}')
             find_coordinate_step_4 = []
             for i in range(0, len(find_square_2), 8):
                 sq = find_square_2[i:i + 8]
@@ -128,6 +131,7 @@ class Worker(QRunnable):
                         search_point = Point(x, y)
                         find_coordinate_step_4.append(search_point)
             # Удалим повторы точек и посчитаем в какой точке какое воздействие
+            print(f'Шаг удаление {self.obj_points}')
             for item in list(set(find_coordinate_step_4)):
                 distance = int(item.distance(obj))
                 if distance == 0:
