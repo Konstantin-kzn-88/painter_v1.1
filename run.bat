@@ -1,0 +1,1 @@
+C:\python\painter_v1.1\venv\Scripts\python.exe main.py
